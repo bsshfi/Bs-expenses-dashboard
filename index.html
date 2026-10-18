@@ -112,14 +112,32 @@ button,select,input{font:inherit;color:inherit}
 .foot a{color:var(--sub)}
 
 /* الإعداد */
-.setup{display:none}
-.setup p{color:var(--sub);font-size:14px;margin:0 0 14px}
-.setup label{display:block;font-size:13px;color:var(--sub);margin:12px 0 6px}
+/* الدخول */
+#auth{display:none}
+.auth{text-align:center;padding:26px 18px}
+.auth .lock{font-size:40px;line-height:1}
+.auth h3{margin:10px 0 4px;font-size:20px}
+.auth p{color:var(--sub);font-size:14px;margin:0 0 6px}
+.dots{display:flex;justify-content:center;gap:14px;margin:22px 0 8px;direction:ltr}
+.dots i{width:15px;height:15px;border-radius:50%;border:2px solid var(--sub)}
+.dots i.f{background:var(--accent);border-color:var(--accent)}
+.dots.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-4px)}}
+.msg{min-height:22px;font-size:14px;font-weight:600;color:var(--up);margin:6px 0}
+.msg.ok{color:var(--down)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:290px;margin:14px auto 6px;direction:ltr}
+.pad button{height:64px;width:64px;justify-self:center;border-radius:50%;border:0;background:var(--bg);font-size:26px;font-weight:600;cursor:pointer}
+.pad button:active{background:var(--line)}
+.pad .ghostk{background:transparent;font-size:15px;color:var(--sub)}
+.link{background:none;border:0;color:var(--accent);font-weight:600;font-size:14px;cursor:pointer;margin-top:10px;padding:8px}
+.form{text-align:right}
+.form label{display:block;font-size:13px;color:var(--sub);margin:14px 0 6px}
 .field{display:flex;gap:8px}
 .field input{flex:1;min-width:0}
 .paste{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:0 14px;font-weight:700;color:var(--accent);cursor:pointer;white-space:nowrap}
 .hint{color:var(--faint);font-size:12px;margin-top:6px}
-.setup input{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:12px;direction:ltr;text-align:left;font-size:14px}
+.form input{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:12px;direction:ltr;text-align:left;font-size:16px}
+.form input.pin{letter-spacing:8px;text-align:center;font-size:20px}
 .btn{margin-top:16px;width:100%;border:0;border-radius:14px;padding:13px;background:var(--accent);color:var(--onaccent);font-weight:700;font-size:16px;cursor:pointer}
 
 /* التخصيص */
@@ -166,18 +184,8 @@ button,select,input{font:inherit;color:inherit}
 
 <div id="banner" class="banner"></div>
 
-<!-- شاشة الإعداد (مرة وحدة) -->
-<div id="setup" class="card setup">
-  <h2>⚙️ الربط مع Bs-Expenses</h2>
-  <p>الصفحة تعرض بياناتك فقط (قراءة)، والرابط والمفتاح ينحفظون في جوالك بس — ما ينرفعون على GitHub.</p>
-  <label for="api">رابط الـ Web App (ينتهي بـ /exec)</label>
-  <div class="field"><input id="api" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="paste" data-for="api">📋 لصق</button></div>
-  <label for="key">مفتاح العرض VIEW_TOKEN</label>
-  <div class="field"><input id="key" type="text" placeholder="view_…" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="paste" data-for="key">📋 لصق</button></div>
-  <div class="hint">اللي تكتبه ينحفظ أول بأول، فلو طلعت تنسخ من تطبيق ثاني ورجعت تلقاه.<br>وتقدر تنسخ الرابط والمفتاح مع بعض (سطرين) وتلصقهم مرة وحدة.</div>
-  <button id="save" class="btn">حفظ وعرض</button>
-  <button id="cancel" class="btn ghost">رجوع</button>
-</div>
+<!-- الدخول بالرقم السري -->
+<div id="auth" class="card auth"></div>
 
 <!-- التخصيص -->
 <div id="prefs">
@@ -196,7 +204,8 @@ button,select,input{font:inherit;color:inherit}
     <h2>🔢 البطاقات الصغيرة</h2>
     <div class="chips" id="pKpis"></div>
   </section>
-  <button id="pConn" class="btn ghost">🔗 الربط مع Bs-Expenses (الرابط والمفتاح)</button>
+  <button id="pChange" class="btn ghost">🔑 تغيير الرقم السري</button>
+  <button id="pLogout" class="btn ghost">🔒 تسجيل خروج من هذا الجهاز</button>
   <button id="pReset" class="btn ghost">↩️ رجّع الإعدادات الافتراضية</button>
   <button id="pDone" class="btn">تم</button>
 </div>
@@ -210,7 +219,9 @@ button,select,input{font:inherit;color:inherit}
 
 <script>
 'use strict';
-const VERSION = 'v1.1.0';
+const VERSION = 'v1.2.0';
+/* ⬇️ حط رابط /exec حق Bs-Expenses هنا (الرابط لحاله ما يفتح شي بدون الرقم السري) */
+const API_URL = 'PASTE_EXEC_URL_HERE';
 const REFRESH_MS = 5 * 60 * 1000;
 const LS = {
   get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
@@ -224,7 +235,6 @@ const WEEK = ['أحد','اثنين','ثلاثاء','أربعاء','خميس','ج
 
 let state = { data: null, month: '', loading: false, tabs: { group: 'banks', tx: 'recent' } };
 
-function cfg(){ return { api: LS.get('bsx:api') || '', key: LS.get('bsx:key') || '' }; }
 function money(v, dec){ const n = Number(v) || 0; if(dec == null) dec = (typeof prefs === 'undefined' || prefs.decimals) ? 2 : 0; return n.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }); }
 function lim(list){ return prefs.limit ? list.slice(0, prefs.limit) : list; }
 function monthName(k){ if(!k) return ''; return MONTHS[Number(k.slice(5,7)) - 1] + ' ' + k.slice(0,4); }
@@ -309,77 +319,160 @@ function renderPrefs(){
     savePrefs();
   });
 }
-function openPrefs(){ renderPrefs(); $('prefs').style.display = 'block'; $('app').style.display = 'none'; $('setup').style.display = 'none'; window.scrollTo(0,0); }
+function openPrefs(){ renderPrefs(); $('prefs').style.display = 'block'; $('app').style.display = 'none'; $('auth').style.display = 'none'; window.scrollTo(0,0); }
 function closePrefs(){ $('prefs').style.display = 'none'; $('app').style.display = 'block'; window.scrollTo(0,0); }
 $('pDone').onclick = closePrefs;
-$('pConn').onclick = () => { $('prefs').style.display = 'none'; openSetup(); };
+$('pChange').onclick = () => { $('prefs').style.display = 'none'; showAuth('change'); };
+$('pLogout').onclick = () => { if(confirm('تسجّل خروج من هذا الجهاز؟ بتحتاج الرقم السري للدخول مرة ثانية.')) logout(); };
 $('pReset').onclick = () => { if(confirm('ترجع الألوان والأقسام للوضع الافتراضي؟')){ prefs = JSON.parse(JSON.stringify(DEFAULT_PREFS)); savePrefs(); } };
 applyTheme();
 
 function showBanner(msg){ const b = $('banner'); if(!msg){ b.style.display='none'; return; } b.textContent = msg; b.style.display='block'; }
 
-/* ---------- الإعداد ---------- */
-function openSetup(){
-  const c = cfg();
-  $('api').value = c.api || LS.get('bsx:draft:api') || '';
-  $('key').value = c.key || LS.get('bsx:draft:key') || '';
-  $('setup').style.display = 'block'; $('app').style.display = 'none'; $('prefs').style.display = 'none';
-  $('cancel').style.display = c.api && c.key ? 'block' : 'none';
+/* ---------- الاتصال بالسكربت ---------- */
+async function api(action, payload){
+  const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(Object.assign({ action: action }, payload || {})), cache: 'no-store' });
+  return res.json();
 }
-function closeSetup(){ $('setup').style.display = 'none'; $('prefs').style.display = 'none'; $('app').style.display = 'block'; }
-$('save').onclick = () => {
-  const api = $('api').value.trim(), key = $('key').value.trim();
-  if(!/^https:\/\/script\.google\.com\/.+\/exec$/.test(api)){ showBanner('الرابط لازم يبدأ بـ https://script.google.com وينتهي بـ /exec'); return; }
-  if(!key){ showBanner('اكتب مفتاح العرض'); return; }
-  LS.set('bsx:api', api); LS.set('bsx:key', key); LS.del('bsx:draft:api'); LS.del('bsx:draft:key'); showBanner('');
-  closeSetup(); load(true);
-};
-$('cancel').onclick = closeSetup;
+function session(){ return LS.get('bsx:session') || ''; }
+function apiReady(){ return /^https:\/\/script\.google\.com\/.+\/exec$/.test(API_URL); }
+function clearData(){
+  try { Object.keys(localStorage).filter(k => k.indexOf('bsx:data:') === 0).forEach(k => localStorage.removeItem(k)); } catch(e){}
+  state.data = null; $('app').innerHTML = ''; $('updated').textContent = ''; $('month').innerHTML = '';
+}
+async function logout(){
+  const s = session();
+  LS.del('bsx:session'); clearData();
+  try { if(s) await api('dash_logout', { session: s }); } catch(e){}
+  showAuth('login');
+}
+function errText(r){
+  switch(r && r.error){
+    case 'WrongPin': return 'الرقم السري غلط' + (r.attemptsLeft != null ? ' — باقي ' + r.attemptsLeft + ' محاولات' : '');
+    case 'WrongViewToken': return 'VIEW_TOKEN غلط' + (r.attemptsLeft != null ? ' — باقي ' + r.attemptsLeft + ' محاولات' : '');
+    case 'Locked': return '🔒 مقفل ' + r.minutes + ' دقيقة بسبب محاولات غلط';
+    case 'NoViewToken': return 'شغّل generateViewToken في السكربت أول';
+    case 'BadPin': return 'الرقم السري لازم يكون 6 أرقام';
+    case 'UnknownAction': case 'Unauthorized': case 'UsePost': case 'Empty message':
+      return 'السكربت ما تحدّث — تأكد من سطر dash_ في code.gs وسوّ New version';
+    default: return (r && r.error) ? '⚠️ ' + r.error : '⚠️ خطأ غير معروف';
+  }
+}
+function digits(v){ return String(v || '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/\D/g, ''); }
 
-/* يحفظ اللي انكتب أول بأول (iOS يعيد تحميل الصفحة لما تطلع للملاحظات وترجع) */
-function smartFill(text, target){
-  const t = String(text || '').trim();
-  const url = (t.match(/https:\/\/script\.google\.com\/\S+?\/exec/) || [])[0];
-  const key = (t.match(/view_[A-Za-z0-9]+/) || [])[0];
-  if(url) $('api').value = url;
-  if(key) $('key').value = key;
-  if(!url && !key && target) $(target).value = t;
-  saveDrafts();
+/* ---------- شاشات الدخول ---------- */
+let pinBuf = '', pinBusy = false;
+function showAuth(mode, note){
+  $('app').style.display = 'none'; $('prefs').style.display = 'none'; $('month').style.visibility = 'hidden'; $('gear').style.visibility = 'hidden'; $('refresh').style.visibility = 'hidden';
+  const a = $('auth'); a.style.display = 'block'; window.scrollTo(0,0);
+  if(!apiReady()){
+    a.innerHTML = '<div class="lock">🔗</div><h3>باقي خطوة</h3><p>افتح index.html في GitHub وحط رابط /exec حق Bs-Expenses مكان PASTE_EXEC_URL_HERE</p>';
+    return;
+  }
+  if(mode === 'login'){
+    pinBuf = '';
+    a.innerHTML = '<div class="lock">🔐</div><h3>مصاريفي</h3><p>اكتب رقمك السري</p>' +
+      '<div class="dots" id="dots">' + '<i></i>'.repeat(6) + '</div><div class="msg" id="amsg">' + esc(note || '') + '</div>' +
+      '<div class="pad">' + [1,2,3,4,5,6,7,8,9].map(n => '<button data-n="' + n + '">' + n + '</button>').join('') +
+      '<button class="ghostk" data-n="clear">مسح</button><button data-n="0">0</button><button class="ghostk" data-n="back">⌫</button></div>' +
+      '<button class="link" id="forgot">نسيت الرقم السري؟</button>';
+    a.querySelectorAll('.pad button').forEach(b => b.onclick = () => padKey(b.dataset.n));
+    $('forgot').onclick = () => showAuth('recover');
+    return;
+  }
+  const T = {
+    setup:   ['🛡️', 'أول مرة — اضبط رقمك السري', 'اكتب VIEW_TOKEN (من Execution log في السكربت) واختر رقم سري من 6 أرقام. بعدها تدخل بالرقم بس.'],
+    recover: ['🔑', 'استعادة الرقم السري', 'اكتب VIEW_TOKEN واختر رقم سري جديد. الأجهزة الثانية بتطلع وتحتاج الرقم الجديد.'],
+    change:  ['🔑', 'تغيير الرقم السري', 'اكتب رقمك الحالي ثم الرقم الجديد.']
+  }[mode];
+  const needView = mode !== 'change';
+  a.innerHTML = '<div class="lock">' + T[0] + '</div><h3>' + T[1] + '</h3><p>' + T[2] + '</p><div class="form">' +
+    (needView
+      ? '<label for="fView">VIEW_TOKEN</label><div class="field"><input id="fView" type="text" placeholder="view_…" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="paste" id="fPaste">📋 لصق</button></div>' +
+        '<div class="hint">ينحفظ مؤقتًا لو طلعت تنسخه وترجع.</div>'
+      : '<label for="fCur">الرقم السري الحالي</label><input id="fCur" class="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off">') +
+    '<label for="fPin">الرقم السري الجديد (6 أرقام)</label><input id="fPin" class="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password">' +
+    '<label for="fPin2">أعد كتابته</label><input id="fPin2" class="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password">' +
+    '</div><div class="msg" id="amsg">' + esc(note || '') + '</div><button class="btn" id="fGo">حفظ</button>' +
+    (mode === 'setup' ? '' : '<button class="link" id="fBack">رجوع</button>');
+  if(needView){
+    $('fView').value = LS.get('bsx:draft:view') || '';
+    $('fView').oninput = () => LS.set('bsx:draft:view', $('fView').value.trim());
+    $('fPaste').onclick = async () => {
+      try {
+        const t = await navigator.clipboard.readText();
+        const m = String(t).match(/view_[A-Za-z0-9]+/);
+        $('fView').value = m ? m[0] : String(t).trim(); LS.set('bsx:draft:view', $('fView').value);
+      } catch(e){ $('amsg').textContent = 'اضغط مطولًا داخل المربع واختر Paste'; }
+    };
+  }
+  if($('fBack')) $('fBack').onclick = () => session() ? enterApp() : showAuth('login');
+  $('fGo').onclick = async () => {
+    const msg = $('amsg'); msg.className = 'msg';
+    const pin = digits($('fPin').value), pin2 = digits($('fPin2').value);
+    if(pin.length !== 6){ msg.textContent = 'الرقم السري لازم يكون 6 أرقام'; return; }
+    if(pin !== pin2){ msg.textContent = 'الرقمين مو متطابقين'; return; }
+    if(/^(\d)\1{5}$/.test(pin) || pin === '123456' || pin === '654321'){ msg.textContent = 'اختر رقم أصعب من ' + pin; return; }
+    $('fGo').disabled = true; msg.textContent = '…';
+    try {
+      const r = needView
+        ? await api('dash_setup', { viewToken: ($('fView').value || '').trim(), pin: pin })
+        : await api('dash_change', { pin: digits($('fCur').value), newPin: pin });
+      if(!r.ok){ msg.textContent = errText(r); $('fGo').disabled = false; return; }
+      if(r.session) LS.set('bsx:session', r.session);
+      LS.del('bsx:draft:view');
+      msg.className = 'msg ok'; msg.textContent = '✅ تم';
+      setTimeout(enterApp, 500);
+    } catch(e){ msg.textContent = '📴 ما قدرت أتصل بالسكربت'; $('fGo').disabled = false; }
+  };
 }
-function saveDrafts(){ LS.set('bsx:draft:api', $('api').value.trim()); LS.set('bsx:draft:key', $('key').value.trim()); }
-['api','key'].forEach(id => {
-  $(id).addEventListener('input', () => {
-    const v = $(id).value;
-    if((id === 'api' && /view_/.test(v)) || (id === 'key' && /script\.google\.com/.test(v)) || (/script\.google\.com/.test(v) && /view_/.test(v))) smartFill(v, null);
-    else saveDrafts();
-  });
-});
-document.querySelectorAll('.paste').forEach(b => b.onclick = async () => {
-  try { smartFill(await navigator.clipboard.readText(), b.dataset.for); showBanner(''); }
-  catch(e){ showBanner('ما قدرت أقرأ الحافظة — اضغط مطولًا داخل المربع واختر Paste'); }
-});
-$('gear').onclick = () => { if(cfg().api && cfg().key) openPrefs(); else openSetup(); };
-$('refresh').onclick = () => load(true);
+function drawDots(){ const d = $('dots'); if(!d) return; d.querySelectorAll('i').forEach((el, i) => el.className = i < pinBuf.length ? 'f' : ''); }
+async function padKey(k){
+  if(pinBusy) return;
+  if(k === 'clear') pinBuf = ''; else if(k === 'back') pinBuf = pinBuf.slice(0, -1); else if(pinBuf.length < 6) pinBuf += k;
+  drawDots();
+  if(pinBuf.length !== 6) return;
+  pinBusy = true; $('amsg').className = 'msg'; $('amsg').textContent = '…';
+  try {
+    const r = await api('dash_login', { pin: pinBuf });
+    if(r.ok){ LS.set('bsx:session', r.session); pinBusy = false; enterApp(); return; }
+    pinBuf = ''; drawDots(); $('dots').classList.remove('shake'); void $('dots').offsetWidth; $('dots').classList.add('shake');
+    $('amsg').textContent = errText(r);
+  } catch(e){ pinBuf = ''; drawDots(); $('amsg').textContent = '📴 ما قدرت أتصل بالسكربت'; }
+  pinBusy = false;
+}
+function enterApp(){
+  $('auth').style.display = 'none'; $('prefs').style.display = 'none'; $('app').style.display = 'block'; $('month').style.visibility = ''; $('gear').style.visibility = ''; $('refresh').style.visibility = '';
+  fromCache(); load(true);
+}
+async function boot(){
+  ['bsx:api','bsx:key','bsx:draft:api','bsx:draft:key'].forEach(k => LS.del(k)); // من النسخ القديمة
+  if(session()){ enterApp(); return; }
+  if(!apiReady()){ showAuth('login'); return; }
+  try { const r = await api('dash_status'); showAuth(r.ok && !r.pinSet ? 'setup' : 'login', r.ok ? '' : errText(r)); }
+  catch(e){ showAuth('login', '📴 ما قدرت أتصل بالسكربت'); }
+}
+
+$('gear').onclick = () => { if(session()) openPrefs(); };
+$('refresh').onclick = () => { if(session()) load(true); };
 $('month').onchange = e => { state.month = e.target.value; fromCache(); load(true); };
 
 /* ---------- جلب البيانات ---------- */
 function cacheKey(m){ return 'bsx:data:' + (m || curMonthKey()); }
 function fromCache(){
+  if(!session()) return false;
   const raw = LS.get(cacheKey(state.month));
   if(raw){ try { state.data = JSON.parse(raw); render(); return true; } catch(e){} }
   return false;
 }
 async function load(force){
-  const c = cfg();
-  if(!c.api || !c.key){ openSetup(); return; }
-  if(state.loading) return;
+  if(!session() || state.loading) return;
   state.loading = true; $('refresh').classList.add('spin');
   try {
-    const url = c.api + '?key=' + encodeURIComponent(c.key) + (state.month ? '&month=' + encodeURIComponent(state.month) : '') + '&t=' + Date.now();
-    const res = await fetch(url, { cache: 'no-store' });
-    const data = await res.json();
+    const data = await api('dash_data', { session: session(), month: state.month || '' });
     if(!data.ok){
-      showBanner(data.error === 'Unauthorized' ? '🔑 المفتاح غير صحيح — افتح الإعدادات ⚙️ وتأكد من VIEW_TOKEN' : '⚠️ ' + (data.error || 'خطأ من السكربت'));
+      if(data.error === 'SessionExpired'){ LS.del('bsx:session'); clearData(); showAuth('login', 'انتهت الجلسة — اكتب رقمك السري'); }
+      else showBanner(errText(data));
     } else {
       showBanner('');
       state.data = data;
@@ -388,7 +481,7 @@ async function load(force){
       render();
     }
   } catch(err){
-    showBanner(state.data ? '📴 ما قدرت أحدّث — تعرض آخر بيانات محفوظة' : '📴 ما قدرت أتصل بالسكربت. تأكد من الرابط والنت.');
+    showBanner(state.data ? '📴 ما قدرت أحدّث — تعرض آخر بيانات محفوظة' : '📴 ما قدرت أتصل بالسكربت. تأكد من النت.');
   } finally {
     state.loading = false; $('refresh').classList.remove('spin');
   }
@@ -520,11 +613,7 @@ function tab(group, v, label){ return '<button data-v="' + v + '" class="' + (st
 
 /* ---------- تشغيل ---------- */
 $('ver').textContent = VERSION;
-if(!cfg().api || !cfg().key){ openSetup(); }
-else {
-  fromCache();
-  load(false);
-}
+boot();
 setInterval(() => { if(document.visibilityState === 'visible') load(false); }, REFRESH_MS);
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') load(false); });
 </script>
