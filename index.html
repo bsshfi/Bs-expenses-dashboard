@@ -100,6 +100,55 @@ button,select,input{font:inherit;color:inherit}
 .track i{display:block;height:100%;background:var(--accent);border-radius:99px}
 .chg.up{color:var(--up)} .chg.down{color:var(--down)}
 
+/* تلميح العمود اليومي */
+.dtip{min-height:20px;font-size:13px;color:var(--sub);margin:-4px 0 6px}
+.dtip b{color:var(--ink)}
+.col.sel .b{outline:2px solid var(--ink);outline-offset:1px}
+
+/* سباق الشهر */
+.race svg{display:block;width:100%;height:150px}
+.leg{display:flex;gap:16px;font-size:12px;color:var(--sub);margin-top:6px}
+.leg i{display:inline-block;width:16px;height:3px;border-radius:2px;vertical-align:middle;margin-inline-end:6px}
+.race .ahead{font-weight:600}
+.axis{display:flex;justify-content:space-between;font-size:11px;color:var(--faint);margin-top:2px}
+
+/* دائرة التصنيفات */
+.donut{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.donut svg{flex-shrink:0}
+.lgd{flex:1;min-width:0;font-size:13px}
+.lgd div{display:flex;align-items:center;gap:8px;padding:3px 0}
+.lgd i{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.lgd span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ===== التصميم 2: ملوّن ===== */
+.d-vivid .card,.d-vivid .kpi{border-radius:22px}
+.d-vivid .hero .big{font-size:42px}
+.d-vivid .kpi .v{color:var(--ink)}
+.d-vivid .kpi .l{font-weight:600}
+
+/* ===== التصميم 3: هادئ ===== */
+.d-minimal .card,.d-minimal .kpi{background:transparent;box-shadow:none;border-radius:0;padding:16px 2px;margin:0;border-top:1px solid var(--line)}
+.d-minimal .hero{text-align:center;padding:40px 0 30px;border-top:0}
+.d-minimal .hero .big{font-size:60px;font-weight:200;letter-spacing:-2px}
+.d-minimal .hero .big small{font-weight:400}
+.d-minimal .hero .meta{justify-content:center}
+.d-minimal .pill{background:transparent!important;padding:0}
+.d-minimal .grid{grid-template-columns:1fr;gap:0;margin:0}
+.d-minimal .kpi{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.d-minimal .kpi .l{font-size:15px;color:var(--sub);flex:1}
+.d-minimal .kpi .v{font-size:17px;font-weight:500;margin:0}
+.d-minimal .kpi .s{display:none}
+.d-minimal .card h2{font-size:12px;letter-spacing:.4px;font-weight:500}
+.d-minimal .track{height:3px;background:var(--line)}
+.d-minimal .track i,.d-minimal .col.on .b,.d-minimal .col.today .b{background:var(--ink)}
+.d-minimal .item .a{font-weight:500}
+.d-minimal .item .n{font-weight:500}
+.d-minimal .alerts{margin:0 0 6px}
+.d-minimal .alert{background:transparent;border:1px solid var(--line);color:var(--sub);font-weight:500}
+.d-minimal .iconbtn,.d-minimal .month{background:transparent;box-shadow:none}
+.d-minimal .tabs button.on{box-shadow:none}
+.d-minimal #prefs .card{background:var(--card);border-radius:18px;border:0;padding:16px;margin-bottom:12px}
+
 .tabs{display:flex;background:var(--line);border-radius:10px;padding:2px;gap:2px}
 .tabs button{border:0;background:transparent;border-radius:8px;padding:4px 10px;font-size:13px;font-weight:600;color:var(--sub);cursor:pointer}
 .tabs button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
@@ -191,6 +240,7 @@ button,select,input{font:inherit;color:inherit}
 <div id="prefs">
   <section class="card">
     <h2>🎨 المظهر</h2>
+    <div class="opt"><div><div class="ol">التصميم</div><div class="os">كل خيارات الضبط تشتغل مع أي تصميم</div></div><div class="seg" id="pDesign"></div></div>
     <div class="opt"><div><div class="ol">الوضع</div></div><div class="seg" id="pTheme"></div></div>
     <div class="opt" style="display:block"><div class="ol" style="margin-bottom:10px">اللون</div><div class="swatches" id="pAccent"></div></div>
     <div class="opt"><div><div class="ol">الهللات</div><div class="os">عرض المبالغ بالكسور (12.50) أو مقرّبة (13)</div></div><input type="checkbox" class="tg" id="pDec"></div>
@@ -219,7 +269,7 @@ button,select,input{font:inherit;color:inherit}
 
 <script>
 'use strict';
-const VERSION = 'v1.2.0';
+const VERSION = 'v1.3.0';
 /* ⬇️ حط رابط /exec حق Bs-Expenses هنا (الرابط لحاله ما يفتح شي بدون الرقم السري) */
 const API_URL = 'https://script.google.com/macros/s/AKfycby4ekgc993bWymMJPDvBuvLhgn-3EQsu0seDfscxyICy_AkzoTf9yVK8o7osbRWYk5wIw/exec';
 const REFRESH_MS = 5 * 60 * 1000;
@@ -253,7 +303,7 @@ const ACCENTS = {
   slate:  { name:'رمادي', l:['#334155','#64748b','#e2e8f0'], d:['#cbd5e1','#e2e8f0','#1e293b'] }
 };
 const SECTIONS = [
-  ['hero','💰 الإجمالي والمقارنة'], ['alerts','⚠️ التنبيهات'], ['kpis','🔢 البطاقات الصغيرة'],
+  ['hero','💰 الإجمالي والمقارنة'], ['race','🏁 سباق الشهر'], ['alerts','⚠️ التنبيهات'], ['kpis','🔢 البطاقات الصغيرة'],
   ['trend','📊 آخر 6 أشهر'], ['daily','📅 الصرف اليومي'], ['categories','📂 التصنيفات'],
   ['merchants','🏪 أكثر التجار صرفًا'], ['groups','🏦 التوزيع (بنك / دفع / نوع)'],
   ['weekday','🗓️ أيام الأسبوع'], ['tx','🧾 العمليات']
@@ -263,7 +313,7 @@ const KPIS = [
   ['prev','⏮️ الشهر السابق'], ['topcat','🥇 أعلى تصنيف'], ['topmerchant','🏪 أكثر تاجر'],
   ['activeDays','🗓️ أيام الصرف'], ['avgActive','💳 متوسط يوم الصرف']
 ];
-const DEFAULT_PREFS = { theme:'auto', accent:'teal', decimals:true, limit:10,
+const DEFAULT_PREFS = { design:'classic', theme:'auto', accent:'teal', decimals:true, limit:10,
   order: SECTIONS.map(x => x[0]), hidden:{}, kpis:['daily','forecast','largest','prev'] };
 function loadPrefs(){
   let p = {};
@@ -271,7 +321,8 @@ function loadPrefs(){
   const out = Object.assign({}, DEFAULT_PREFS, p);
   const known = SECTIONS.map(x => x[0]);
   out.order = (Array.isArray(p.order) ? p.order : []).filter(id => known.indexOf(id) !== -1);
-  known.forEach(id => { if(out.order.indexOf(id) === -1) out.order.push(id); });
+  known.forEach((id, idx) => { if(out.order.indexOf(id) === -1) out.order.splice(Math.min(idx, out.order.length), 0, id); });
+  if(['classic','vivid','minimal'].indexOf(out.design) === -1) out.design = 'classic';
   out.hidden = Object.assign({}, p.hidden || {});
   out.kpis = Array.isArray(p.kpis) ? p.kpis.filter(id => KPIS.some(x => x[0] === id)) : DEFAULT_PREFS.kpis.slice();
   if(!ACCENTS[out.accent]) out.accent = 'teal';
@@ -285,12 +336,18 @@ function applyTheme(){
   if(prefs.theme === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', prefs.theme);
   const a = ACCENTS[prefs.accent][isDark() ? 'd' : 'l'];
   root.style.setProperty('--accent', a[0]); root.style.setProperty('--accent2', a[1]); root.style.setProperty('--accentbg', a[2]);
-  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', isDark() ? '#0b0d10' : '#f3f4f6'));
+  document.body.classList.remove('d-classic','d-vivid','d-minimal'); document.body.classList.add('d-' + prefs.design);
+  if(prefs.design === 'minimal'){ root.style.setProperty('--bg', isDark() ? '#000000' : '#ffffff'); }
+  else root.style.removeProperty('--bg');
+  const bg = prefs.design === 'minimal' ? (isDark() ? '#000000' : '#ffffff') : (isDark() ? '#0b0d10' : '#f3f4f6');
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', bg));
 }
 if(window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 
 function segHtml(opts, cur){ return opts.map(o => '<button data-v="' + o[0] + '" class="' + (String(cur) === String(o[0]) ? 'on' : '') + '">' + o[1] + '</button>').join(''); }
 function renderPrefs(){
+  $('pDesign').innerHTML = segHtml([['classic','كلاسيك'],['vivid','ملوّن'],['minimal','هادئ']], prefs.design);
+  $('pDesign').querySelectorAll('button').forEach(b => b.onclick = () => { prefs.design = b.dataset.v; savePrefs(); });
   $('pTheme').innerHTML = segHtml([['auto','تلقائي'],['light','فاتح'],['dark','داكن']], prefs.theme);
   $('pLimit').innerHTML = segHtml([[5,'5'],[10,'10'],[0,'الكل']], prefs.limit);
   $('pAccent').innerHTML = Object.keys(ACCENTS).map(k => '<button class="sw' + (k === prefs.accent ? ' on' : '') + '" data-v="' + k + '" title="' + ACCENTS[k].name + '" style="background:' + ACCENTS[k][isDark() ? 'd' : 'l'][0] + '"></button>').join('');
@@ -549,19 +606,58 @@ function render(){
   B.daily = () => {
     const dmax = Math.max.apply(null, d.daily.concat([1]));
     const today = d.isCurrent ? d.elapsed : -1;
-    return '<section class="card"><h2>الصرف اليومي <span class="num" style="font-weight:500">أعلى يوم: ' + money(dmax, 0) + '</span></h2><div class="cols">' + d.daily.map((v, i) =>
-      '<div class="col' + (i + 1 === today ? ' today' : (v > 0 ? ' on' : (today > 0 && i + 1 > today ? ' future' : ''))) + '"><div class="b" style="height:' + pct(Math.max(v, 0), dmax) + '%" title="' + (i+1) + ': ' + money(v) + '"></div>' +
+    const vivid = prefs.design === 'vivid';
+    return '<section class="card daily"><h2>الصرف اليومي <span class="num" style="font-weight:500">أعلى يوم: ' + money(dmax, 0) + '</span></h2>' +
+      '<div class="dtip" id="dtip">اضغط على أي يوم يطلع لك مبلغه</div><div class="cols">' + d.daily.map((v, i) =>
+      '<div class="col' + (i + 1 === today ? ' today' : (v > 0 ? ' on' : (today > 0 && i + 1 > today ? ' future' : ''))) + '" data-i="' + i + '"><div class="b" style="height:' + pct(Math.max(v, 0), dmax) + '%' + (vivid && v > 0 ? ';background:' + (i + 1 === today ? '#2563eb' : '#60a5fa') : '') + '"></div>' +
       '<div class="t num">' + ((i + 1) % 5 === 1 || i + 1 === today ? (i + 1) : '') + '</div></div>').join('') + '</div></section>';
   };
 
-  B.categories = () => '<section class="card"><h2>التصنيفات</h2><div class="list">' + (d.categories.length ? lim(d.categories).map(c => {
+  B.race = () => {
+    if(!d.prevDaily) return '<section class="card"><h2>🏁 سباق الشهر</h2><div class="empty">حدّث Api.gs في السكربت عشان يظهر السباق</div></section>';
+    const cum = a => { let s = 0; return a.map(v => (s += v)); };
+    const cur = cum(d.daily).slice(0, d.elapsed), prev = cum(d.prevDaily);
+    const W = 340, H = 150, n = Math.max(d.daily.length, d.prevDaily.length) - 1;
+    const max = Math.max.apply(null, prev.concat(cur).concat([1]));
+    const X = i => (W - 6 - (i / n) * (W - 12)).toFixed(1), Y = v => (H - 6 - Math.max(v, 0) / max * (H - 14)).toFixed(1);
+    const line = a => a.map((v, i) => X(i) + ',' + Y(v)).join(' ');
+    const lastI = cur.length - 1, curV = cur[lastI] || 0, prevV = prev[Math.min(lastI, prev.length - 1)] || 0;
+    const diff = curV - prevV;
+    const color = prefs.design === 'vivid' ? '#f97316' : 'var(--accent)';
+    const prevName = shortMonth(d.trend[4].month), curName = shortMonth(d.month);
+    const head = diff <= 0 ? '<span class="ahead" style="color:var(--down)">أقل بـ <span class="num">' + money(-diff, 0) + '</span></span>'
+                           : '<span class="ahead" style="color:var(--up)">أكثر بـ <span class="num">' + money(diff, 0) + '</span></span>';
+    return '<section class="card race"><h2>🏁 سباق الشهر ' + head + '</h2>' +
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
+      '<polyline points="' + line(prev) + '" fill="none" stroke="var(--faint)" stroke-width="2.2" stroke-dasharray="5 5" vector-effect="non-scaling-stroke"/>' +
+      (cur.length ? '<polygon points="' + line(cur) + ' ' + X(lastI) + ',' + (H - 6) + ' ' + X(0) + ',' + (H - 6) + '" fill="' + color + '" opacity=".13"/>' +
+        '<polyline points="' + line(cur) + '" fill="none" stroke="' + color + '" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>' +
+        '<circle cx="' + X(lastI) + '" cy="' + Y(curV) + '" r="4.5" fill="' + color + '"/>' : '') +
+      '</svg><div class="axis"><span>1</span><span>' + Math.ceil((n + 1) / 2) + '</span><span>' + (n + 1) + '</span></div><div class="leg"><span><i style="background:' + color + '"></i>' + curName + ' <span class="num">' + money(curV, 0) + '</span></span>' +
+      '<span><i style="background:var(--faint)"></i>' + prevName + ' لنفس اليوم <span class="num">' + money(prevV, 0) + '</span></span></div></section>';
+  };
+
+  B.categories = () => {
+    const vivid = prefs.design === 'vivid';
+    let donut = '';
+    if(vivid && d.categories.length){
+      const list = d.categories.filter(c => c.amount > 0), tot = list.reduce((a, c) => a + c.amount, 0) || 1;
+      const R = 62, C = 2 * Math.PI * R; let acc = 0;
+      const arcs = list.map(c => { const len = c.amount / tot * C; const a = '<circle r="' + R + '" cx="80" cy="80" fill="none" stroke="' + catColor(c.name) + '" stroke-width="24" stroke-dasharray="' + Math.max(len - 1.5, 0.5) + ' ' + C + '" stroke-dashoffset="' + (-acc) + '" transform="rotate(-90 80 80)"/>'; acc += len; return a; }).join('');
+      donut = '<div class="donut"><svg width="140" height="140" viewBox="0 0 160 160">' + arcs +
+        '<text x="80" y="76" text-anchor="middle" font-size="12" fill="var(--sub)">' + list.length + ' تصنيفات</text>' +
+        '<text x="80" y="96" text-anchor="middle" font-size="17" font-weight="800" fill="var(--ink)">' + money(tot, 0) + '</text></svg>' +
+        '<div class="lgd">' + list.slice(0, 6).map(c => '<div><i style="background:' + catColor(c.name) + '"></i><span>' + esc(c.name) + '</span><b class="num">' + Math.round(c.amount / tot * 100) + '%</b></div>').join('') + '</div></div>';
+    }
+    return '<section class="card"><h2>التصنيفات</h2>' + donut + '<div class="list">' + (d.categories.length ? lim(d.categories).map(c => {
     let ch = '';
     if(c.prev > 0){ const p = (c.amount - c.prev) / c.prev * 100; ch = '<span class="chg ' + (p > 0 ? 'up' : 'down') + '"><span class="num">' + (p > 0 ? '+' : '') + p.toFixed(0) + '%</span>' + (k.samePeriod ? ' عن نفس الفترة' : ' عن الشهر السابق') + '</span>'; }
     else if(c.amount > 0) ch = '<span>جديد هالشهر</span>';
     return '<div class="item"><div class="r1"><span class="n">' + esc(c.name) + '</span><span class="a num">' + money(c.amount) + '</span></div>' +
-      '<div class="track"><i style="width:' + pct(c.amount, k.total) + '%"></i></div>' +
+      '<div class="track"><i style="width:' + pct(c.amount, k.total) + '%' + (vivid ? ';background:' + catColor(c.name) : '') + '"></i></div>' +
       '<div class="r2"><span><span class="num">' + pct(c.amount, k.total).toFixed(1) + '%</span> · ' + c.count + ' عملية</span>' + ch + '</div></div>';
   }).join('') : empty) + '</div></section>';
+  };
 
   B.merchants = () => {
     const mmax = d.merchants.length ? d.merchants[0].amount : 1;
@@ -604,9 +700,27 @@ function render(){
     fromCache();
     load(true);
   });
+  document.querySelectorAll('.daily .col').forEach(el => el.onclick = () => {
+    const i = Number(el.dataset.i), v = d.daily[i] || 0, c = d.dailyCount ? d.dailyCount[i] : null;
+    document.querySelectorAll('.daily .col.sel').forEach(x => x.classList.remove('sel')); el.classList.add('sel');
+    $('dtip').innerHTML = (i + 1) + ' ' + shortMonth(d.month) + ' · <b class="num">' + money(v) + '</b> ' + (d.base === 'SAR' ? 'ر.س' : esc(d.base)) + (c !== null ? ' · ' + (c === 1 ? 'عملية وحدة' : c === 2 ? 'عمليتين' : c + (c <= 10 ? ' عمليات' : ' عملية')) : '');
+  });
   document.querySelectorAll('[data-tabs] button').forEach(b => b.onclick = () => {
     state.tabs[b.parentNode.dataset.tabs] = b.dataset.v; render();
   });
+}
+/* لون ثابت لكل تصنيف (التصميم الملوّن) */
+const CAT_COLORS = [
+  [/منزل/, '#3b82f6'], [/مطاعم|مقاهي/, '#f97316'], [/بقالة|تموينات/, '#22c55e'], [/تسوق/, '#a855f7'],
+  [/عناية/, '#ec4899'], [/صحة/, '#ef4444'], [/وقود/, '#eab308'], [/سيارات/, '#64748b'], [/اتصالات/, '#06b6d4'],
+  [/تحويلات/, '#14b8a6'], [/سفر/, '#0ea5e9'], [/ترفيه/, '#8b5cf6'], [/تعليم/, '#6366f1'], [/اشتراكات/, '#d946ef'],
+  [/تبرعات/, '#10b981'], [/عائلة/, '#f43f5e'], [/ملابس/, '#c026d3'], [/مالية/, '#0d9488'], [/أخرى|اخرى/, '#94a3b8'], [/غير\s*مصنف/, '#9ca3af']
+];
+const SPARE = ['#2563eb','#ea580c','#16a34a','#9333ea','#db2777','#ca8a04','#0891b2','#4f46e5'];
+function catColor(name){
+  for(let i = 0; i < CAT_COLORS.length; i++) if(CAT_COLORS[i][0].test(name)) return CAT_COLORS[i][1];
+  let h = 0; for(const ch of String(name)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return SPARE[h % SPARE.length];
 }
 function kpi(l, v, s){ return '<div class="kpi"><div class="l">' + l + '</div><div class="v num">' + v + '</div><div class="s">' + esc(s || '') + '</div></div>'; }
 function tab(group, v, label){ return '<button data-v="' + v + '" class="' + (state.tabs[group] === v ? 'on' : '') + '">' + label + '</button>'; }
